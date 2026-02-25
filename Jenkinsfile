@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'python-node' } // This forces execution on your Azure VM
+    agent { label 'python-node' } // Ensures execution on your Azure Linux VM
 
     stages {
         stage('Verify Remote Environment') {
@@ -12,7 +12,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Installs Flask on the remote Azure Linux environment
+                // Installs Flask on the remote Azure environment
                 sh 'pip3 install flask --break-system-packages' 
             }
         }
@@ -28,11 +28,10 @@ pipeline {
             steps {
                 script {
                     echo "Starting Flask App in the background..."
-                    // 1. Stop any existing version of the app running on port 5000
+                    // 1. Clears port 5000 if it's already in use from a previous build
                     sh 'fuser -k 5000/tcp || true'
                     
-                    // 2. Start the app and prevent Jenkins from killing the process
-                    // host 0.0.0.0 makes it accessible via your Public IP
+                    // 2. Starts the app and prevents Jenkins from killing the process after build completion
                     sh 'JENKINS_NODE_COOKIE=dontKillMe nohup python3 app.py > output.log 2>&1 &'
                 }
             }
